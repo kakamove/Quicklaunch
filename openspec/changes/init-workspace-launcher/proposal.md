@@ -1,35 +1,31 @@
 ## Why
 
-为了解决每日开发时手动切换多个项目目录、重复启动 tmux session 并通过快捷键挂起的繁琐流程，需要建立一个轻量级、零依赖、模块化且具备幂等性的开发工作区管理工具（Workspace Manager / Quicklaunch）。
+为了解决每日开发时手动切换多个项目目录、重复启动 tmux session 并通过快捷键挂起的繁琐流程，需要建立一个轻量级、零依赖、工程化且具备高扩展性的开发工作区管理工具（Workspace Manager / Quicklaunch）。
 
-通过声明式 Shell DSL 配置与模块化 CLI 命令路由，不仅能一键恢复与管理所有预设的工作区 session，还能为未来拓展项目组、IDE 与 AI 上下文恢复奠定清晰坚固的架构基础。
+通过声明式 Shell DSL 配置、模块化 Command Router 以及严格的组件函数作用域与代码规模约束，不仅能够一键恢复与管理所有预设工作区，还能为长期维护与 AI 智能体协作建立稳定整洁的工程范式。
 
 ## What Changes
 
-- **函数式 Shell DSL 配置**：将配置提升为声明式 `workspace` 函数调用语法，支持 `--name`, `--path`, `--default` 等扩展参数，为未来扩展 `--group`, `--icon` 等属性预留结构空间。
-- **模块化 CLI 目录结构与 Command Router**：
-  - `bin/work` 作为主入口与 Command Router。
-  - `lib/commands/` 下拆分子命令独立脚本（`start`, `status`, `ls`, `attach`, `go`, `doctor`, `config`）。
-  - `lib/` 下拆分基础组件（`config.sh`, `tmux.sh`, `ui.sh`, `utils.sh`），便于 AI 与人类开发者精确定位与维护。
-- **子命令能力增强与扩充**：
-  - `work` / `work start`：静默恢复全部工作区 session。
-  - `work ls`：列出声明配置的工作区清单。
-  - `work status`：输出包含运行状态、窗口数量（Windows Count）、Attach 标志的高级状态面板。
-  - `work attach`：交互式进入 session（内置 `fzf` 搜索与 Zsh `select` 原生菜单平滑降级）。
-  - `work go`：直接进入标记为 `--default` 的主工作区。
-  - `work doctor`：提供环境诊断能力（校验 tmux, zsh, PATH, editor, fzf, config 及工作区目录有效性）。
-  - `work config`：通过 `${EDITOR:-vim}` 编辑配置文件。
-- **Tmux Context Sensing**：自动处理 tmux 内部（`switch-client`）与外部（`attach-session`）的进入逻辑。
+- **函数式 Shell DSL 与并行数组模型**：采用 `workspace --name <name> --path <path> [--default]` 声明式 DSL，内部采用高可读的 Parallel Arrays 存储配置数据。
+- **模块化代码结构与单入口约束**：
+  - `bin/work` 作为主 Router 调度入口。
+  - 各子命令独立存在于 `lib/commands/`，且每个模块严格仅暴露单一主入口函数（如 `cmd_status::run`、`cmd_doctor::run`）。
+  - **文件规模约束**：所有逻辑模块文件严格控制在 100–150 行以内，杜绝臃肿脚本。
+- **统一 UI 库与状态美化**：
+  - 封装 `lib/ui.sh` 提供统一渲染接口（`ui::header`, `ui::ok`, `ui::warn`, `ui::error`, `ui::table`）。
+  - `work status` 动态仪表盘增加默认主工作区专属视觉标记（`★`）。
+- **完善的子命令集**：支持 `work` (恢复), `work status` (仪表盘), `work ls` (静态配置), `work attach` (交互), `work go` (默认进入), `work doctor` (环境诊断), `work config` (编辑配置)。
+- **Tmux Context Sensing**：自动感知 shell 环境，区分执行 `tmux switch-client` 或 `tmux attach-session`。
 
 ## Capabilities
 
 ### New Capabilities
-- `workspace-launcher`: 提供基于 Shell DSL 函数式配置、模块化 Command Router 及环境诊断功能的开发工作区管理工具。
+- `workspace-launcher`: 提供基于 Shell DSL 函数式配置、模块化 Command Router、严格文件规模约束及环境诊断能力的开发工作区管理工具。
 
 ### Modified Capabilities
 
 ## Impact
 
-- **项目目录结构**：创建包含 `bin/work` 和 `lib/`（`commands/` 与核心公共组件）的模块化源码目录。
-- **用户环境配置**：配置文件存放在 `~/.config/quicklaunch/config.sh`，可加载 `workspace` 函数 DSL；CLI 挂载至 `~/.local/bin/work`。
+- **代码规范与维护**：所有 CLI 逻辑解耦为模块化脚本，全局作用域受控，便于 AI Agent (Claude Code / Codex / Antigravity) 及开发者精准维护。
+- **用户环境配置**：配置文件存放在 `~/.config/quicklaunch/config.sh`；CLI 工具安装至 `~/.local/bin/work`。
 - **外部依赖**：原生依赖 macOS Zsh 与 tmux；可选依赖 `fzf`。
