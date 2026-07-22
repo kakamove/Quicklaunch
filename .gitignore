@@ -1,0 +1,14 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Agent & CLI caches
+.gemini/
+.claude/
+tmp/
+*.log
+
+# Build & Dependencies (if any added later)
+node_modules/
+dist/
+bin/
