@@ -11,4 +11,4 @@ tmp/
 # Build & Dependencies (if any added later)
 node_modules/
 dist/
-bin/
+

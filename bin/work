@@ -1,0 +1,81 @@
+#!/usr/bin/env zsh
+# bin/work - Quicklaunch CLI Entrypoint & Command Router
+
+set -u
+
+# Resolve root directory
+_QL_APP_ROOT="${0:A:h:h}"
+
+# Source core libraries
+source "${_QL_APP_ROOT}/lib/ui.sh"
+source "${_QL_APP_ROOT}/lib/utils.sh"
+source "${_QL_APP_ROOT}/lib/config.sh"
+source "${_QL_APP_ROOT}/lib/tmux.sh"
+
+# Load user configuration
+config::load
+
+# Dispatcher
+local cmd="${1:-start}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$cmd" in
+  start|restore)
+    source "${_QL_APP_ROOT}/lib/commands/start.sh"
+    cmd_start::run "$@"
+    ;;
+  status|st)
+    source "${_QL_APP_ROOT}/lib/commands/status.sh"
+    cmd_status::run "$@"
+    ;;
+  ls|list)
+    source "${_QL_APP_ROOT}/lib/commands/ls.sh"
+    cmd_ls::run "$@"
+    ;;
+  attach|at)
+    source "${_QL_APP_ROOT}/lib/commands/attach.sh"
+    cmd_attach::run "$@"
+    ;;
+  go)
+    source "${_QL_APP_ROOT}/lib/commands/go.sh"
+    cmd_go::run "$@"
+    ;;
+  doctor|doc)
+    source "${_QL_APP_ROOT}/lib/commands/doctor.sh"
+    cmd_doctor::run "$@"
+    ;;
+  config|cfg)
+    source "${_QL_APP_ROOT}/lib/commands/config.sh"
+    cmd_config::run "$@"
+    ;;
+  help|-h|--help)
+    echo "Quicklaunch (Workspace Manager) v1.0"
+    echo ""
+    echo "Usage: work [command] [args]"
+    echo ""
+    echo "Commands:"
+    echo "  work            Restore/start all workspace sessions"
+    echo "  work status     Show operational status dashboard"
+    echo "  work ls         List static workspace configurations"
+    echo "  work attach     Interactively select and attach to a session"
+    echo "  work go         Attach directly to default workspace"
+    echo "  work <name>     Attach directly to named workspace"
+    echo "  work doctor     Run environment health diagnostics"
+    echo "  work config     Edit configuration file"
+    ;;
+  *)
+    # Check if subcommand is a workspace name
+    local idx
+    idx=$(utils::find_index_by_name "$cmd")
+    if [[ "$idx" -gt 0 ]]; then
+      source "${_QL_APP_ROOT}/lib/commands/attach.sh"
+      cmd_attach::run "$cmd" "$@"
+    else
+      ui::error "Unknown command or workspace name: $cmd"
+      echo "Run 'work help' for available commands."
+      exit 1
+    fi
+    ;;
+esac
