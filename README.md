@@ -2,6 +2,8 @@
 
 Quicklaunch 是一个基于 Zsh 与 Tmux 的轻量级多工作区管理与启动工具。通过简洁的 Shell DSL 配置，只需一条命令即可完成所有研发项目工作区（Tmux 会话）的开机恢复、快速跳转、交互筛选与健康诊断。
 
+![Quicklaunch Preview](docs/screenshot.png)
+
 ---
 
 ## 🌟 功能特性
